@@ -1,8 +1,7 @@
 beforeEach(() => {
-    cy.visit("/")
-});
-
-describe("Log in page", () => {
+    cy.visit("/");
+  });
+  describe("Log in page", () => {
     it("page visible", () => {
         cy.contains("Books list").should('be.visible');
     });
@@ -13,7 +12,7 @@ describe("Log in page", () => {
     });
 
     it("empty login", () => {
-        cy.login(null, "test"); 
+        cy.login(" ", "test"); 
         cy.get("#mail")
             .then((element) => {
             return element[0].checkValidity();
@@ -25,43 +24,46 @@ describe("Log in page", () => {
         })
             .should("contain", "Заполните это поле.");
     });
-    it("empty pass", () => {
-        cy.login("test@test.com", null); 
+    it("false pass", () => {
+        cy.login("test@test.com", "1"); 
         cy.get("#pass")
-            .then((element) => {
-            return element[0].checkValidity();
-        })
-            .should("be.false");
-        cy.get("#pass")
-            .then((element) => {
-            return element[0].validationMessage;
-        })
-            .should("contain", "Заполните это поле.");
+        cy.contains("Неправильая почта или пароль").should("be.visible");
     });
 
-    describe.only("BookApp testing", () => {
-        beforeEach(() => {
-            cy.login("test@test.com", "test");
-        });
-
-        it("Add new book", () => {
-            cy.addBook("Book1", "Author1");
-            cy.contains("Book1").should("be.visible");
-        });
-
-        it("Add new book to Favorites", () => {
-            cy.addBook("Book1", "Author1");
-            cy.contains("Add to favorite").first().click();
-            cy.contains("Favorites").click();
-            cy.contains("Delete from favorite").first().should("be.visible");
-        });
-
-        it("Delete book from Favorites", () => {
-            cy.addBook("Book1", "Author1");
-            cy.contains("Add to favorite").first().click();
-            cy.contains("Favorites").click();
-            cy.contains("Delete from favorite").first().click();
-            cy.contains("Please add some book to favorit on home page!").should("be.visible");
-        })
-    })
+  describe("Test favourite books list app", () => {
+    it("Add new book and then add to favourite", () => {
+      cy.login("bropet@mail.ru", "123");
+  
+      cy.addBook("testName1", "testDescription1");
+  
+      cy.addToFavorite();
+      cy.contains("Delete from favorite").should("be.visible");
+  
+      cy.logout();
+    });
+  
+    it("Delete book from favourites", () => {
+      cy.login("bropet@mail.ru", "123");
+  
+      cy.contains("Delete from favorite").should("be.visible");
+      cy.contains("Delete from favorite").click();
+      cy.contains("Add to favorite").should("be.visible");
+  
+      cy.logout();
+    });
+  
+    it("Add new book and then add to favourite", () => {
+      cy.login("bropet@mail.ru", "123");
+  
+      cy.addToFavorite();
+      cy.contains("Delete from favorite").should("be.visible");
+  
+      cy.contains("Favorites").click();
+      cy.contains("Delete from favorite").should("be.visible");
+      cy.contains("Delete from favorite").click();
+      cy.contains("Please add some book to favorit on home page!").should("be.visible");
+  
+      cy.logout();
+    });
+  });
 })
